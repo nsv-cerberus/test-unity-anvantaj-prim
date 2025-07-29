@@ -4,7 +4,7 @@ using Zenject;
 
 public class Blocks : MonoBehaviour
 {
-    [SerializeField] private Grid _grid = new Grid();
+    private Grid _grid = new Grid();
     [SerializeField] private Block _blockPrefab;
     [SerializeField] private BlocksSettingsSO _blocksSettings;
     [SerializeField] private LevelMovesSettingsSO _levelMovesSettings;

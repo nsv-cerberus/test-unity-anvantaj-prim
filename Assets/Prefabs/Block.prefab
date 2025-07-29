@@ -222,7 +222,7 @@ GameObject:
   - component: {fileID: 3835063535524277626}
   - component: {fileID: 3091468528692948415}
   - component: {fileID: 9187143456337358280}
-  m_Layer: 5
+  m_Layer: 3
   m_Name: Block
   m_TagString: Block
   m_Icon: {fileID: 0}
@@ -311,3 +311,4 @@ MonoBehaviour:
   _background: {fileID: 1349834401030389811}
   _text: {fileID: 9218343261859090899}
   _moveAnimationDuration: 0.5
+  _mergeAnimationDuration: 0.5

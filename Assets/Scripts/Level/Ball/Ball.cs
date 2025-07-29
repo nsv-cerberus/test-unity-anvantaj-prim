@@ -19,12 +19,12 @@ public class Ball : MonoBehaviour
 
     private void Start()
     {
-        _levelGameplayManager.LaunchBallToDirection += Launch;
+        _levelGameplayManager.LaunchBallToDirection += LaunchToDirection;
     }
 
-    private void Launch(Vector2 directionPosition)
+    private void LaunchToDirection(Vector2 direction)
     {
-        _direction = (directionPosition - (Vector2)Camera.main.ScreenToWorldPoint(transform.position)).normalized;
+        _direction = direction;
         SetVelocity();
     }
 
@@ -80,6 +80,6 @@ public class Ball : MonoBehaviour
 
     private void OnDestroy()
     {
-        _levelGameplayManager.LaunchBallToDirection -= Launch;
+        _levelGameplayManager.LaunchBallToDirection -= LaunchToDirection;
     }
 }

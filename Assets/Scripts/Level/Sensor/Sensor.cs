@@ -1,21 +1,23 @@
+using System;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using Zenject;
 
-[RequireComponent(typeof(BounceLinePreview))]
 public class Sensor : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IDragHandler
 {
+    public event Action<Vector2, Vector2> DrawBounceLine;
+    public event Action ResetBounceLine;
+
     [SerializeField] private Ball _ball;
 
     [Inject] private LevelGameplayManager _levelGameplayManager;
-
-    private BounceLinePreview _bounceLinePreview;
+    
     private bool _isWorking = false;
+
+    public Ball Ball => _ball;
 
     private void Awake()
     {
-        _bounceLinePreview = GetComponent<BounceLinePreview>();
-
         _levelGameplayManager.ActivateSensor += ActivateSensor;
     }
 
@@ -23,41 +25,41 @@ public class Sensor : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IDr
     {
         if (!_isWorking) return;
 
-        Vector3 startPosition = Camera.main.ScreenToWorldPoint(eventData.position);
-        startPosition.z = 0;
+        Vector2 touchPosition = eventData.position;
+        Vector2 screenBallPosition = Camera.main.WorldToScreenPoint(_ball.transform.position);
+        Vector2 direction = (touchPosition - screenBallPosition).normalized;
 
-        Vector3 ballPosition = Camera.main.ScreenToWorldPoint(_ball.transform.position);
-        Vector2 direction = (startPosition - ballPosition).normalized;
-
-        _bounceLinePreview.ShowPreview(_ball.transform.position, direction);
+        OnDrawBounceLine(screenBallPosition, direction);
     }
 
     public void OnDrag(PointerEventData eventData)
     {
         if (!_isWorking) return;
 
-        Vector3 currentPosition = Camera.main.ScreenToWorldPoint(eventData.position);
-        currentPosition.z = 0;
+        Vector2 touchPosition = eventData.position;
+        Vector2 screenBallPosition = Camera.main.WorldToScreenPoint(_ball.transform.position);
+        Vector2 direction = (touchPosition - screenBallPosition).normalized;
 
-        Vector3 ballPosition = Camera.main.ScreenToWorldPoint(_ball.transform.position);
-        Vector2 direction = (currentPosition - ballPosition).normalized;
-
-        _bounceLinePreview.ShowPreview(_ball.transform.position, direction);
+        OnDrawBounceLine(screenBallPosition, direction);
     }
 
     public void OnPointerUp(PointerEventData eventData)
     {
         if (!_isWorking) return;
 
-        Vector3 endPosition = Camera.main.ScreenToWorldPoint(eventData.position);
-        _levelGameplayManager.OnLaunchBallToDirection(new Vector2(endPosition.x, endPosition.y));
-        DeactivateSensor();
+        Vector2 touchPosition = eventData.position;
+        Vector2 screenBallPosition = Camera.main.WorldToScreenPoint(_ball.transform.position);
+        Vector2 direction = (touchPosition - screenBallPosition).normalized;
 
-        // _bounceLinePreview.Clear(); -- нужно сделать очистку отдельно!
+        _levelGameplayManager.OnLaunchBallToDirection(direction);
+        DeactivateSensor();
     }
 
     private void ActivateSensor() => _isWorking = true;
     private void DeactivateSensor() => _isWorking = false;
+
+    private void OnDrawBounceLine(Vector2 screenStartPosition, Vector2 direction) => DrawBounceLine?.Invoke(screenStartPosition, direction);
+    private void OnResetBounceLine() => ResetBounceLine?.Invoke();
 
     public void OnDestroy()
     {

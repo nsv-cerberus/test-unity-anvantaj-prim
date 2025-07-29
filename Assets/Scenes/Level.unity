@@ -609,7 +609,7 @@ GameObject:
   - component: {fileID: 209857037}
   - component: {fileID: 209857038}
   m_Layer: 5
-  m_Name: LevelWrapper
+  m_Name: LevelContainer
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -629,8 +629,8 @@ RectTransform:
   m_Children:
   - {fileID: 153645219}
   - {fileID: 1126846400}
+  - {fileID: 1476273306}
   - {fileID: 932859486}
-  - {fileID: 1979019581}
   m_Father: {fileID: 2040028165}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -701,7 +701,7 @@ BoxCollider2D:
   m_Enabled: 1
   serializedVersion: 3
   m_Density: 1
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 6200000, guid: 62676aff2df683443a96bdbb3143a4da, type: 2}
   m_IncludeLayers:
     serializedVersion: 2
     m_Bits: 0
@@ -836,7 +836,7 @@ BoxCollider2D:
   m_Enabled: 1
   serializedVersion: 3
   m_Density: 1
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 6200000, guid: 62676aff2df683443a96bdbb3143a4da, type: 2}
   m_IncludeLayers:
     serializedVersion: 2
     m_Bits: 0
@@ -1234,7 +1234,6 @@ GameObject:
   - component: {fileID: 932859488}
   - component: {fileID: 932859487}
   - component: {fileID: 932859489}
-  - component: {fileID: 932859490}
   m_Layer: 5
   m_Name: Sensor
   m_TagString: Untagged
@@ -1261,7 +1260,7 @@ RectTransform:
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
-  m_Pivot: {x: 0.5, y: 0.5}
+  m_Pivot: {x: 0, y: 0}
 --- !u!114 &932859487
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1313,24 +1312,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _ball: {fileID: 1747913442}
---- !u!114 &932859490
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 932859485}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5d07ab800a61e034bbe1c2f28d96b9ea, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _dotPrefab: {fileID: 3953161670692844237, guid: ef568f2286e115f45855a97e09824749, type: 3}
-  _dotsContainer: {fileID: 1688172670}
-  bounceMask:
-    serializedVersion: 2
-    m_Bits: 8
-  dotCount: 10
 --- !u!1 &1126846399
 GameObject:
   m_ObjectHideFlags: 0
@@ -1382,8 +1363,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1688172670}
+  - component: {fileID: 1688172671}
   m_Layer: 5
-  m_Name: DotContainer
+  m_Name: BounceLine
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1404,10 +1386,30 @@ RectTransform:
   m_Father: {fileID: 932859486}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 1, y: 1}
+  m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
-  m_Pivot: {x: 0.5, y: 0.5}
+  m_Pivot: {x: 0, y: 0}
+--- !u!114 &1688172671
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1688172669}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2a1f9915b2a231b40a8da350a9516f75, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _canvas: {fileID: 2040028164}
+  _dotPrefab: {fileID: 3953161670692844237, guid: ef568f2286e115f45855a97e09824749, type: 3}
+  _dotsCount: 10
+  _collisionMask:
+    serializedVersion: 2
+    m_Bits: 8
+  _maxRayDistance: 1000
+  _sensor: {fileID: 932859489}
 --- !u!114 &1747913442 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 9192027656411159503, guid: dee6ab39eba1650449efc7aa8eeef044, type: 3}
@@ -1468,7 +1470,7 @@ BoxCollider2D:
   m_Enabled: 1
   serializedVersion: 3
   m_Density: 1
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 6200000, guid: 62676aff2df683443a96bdbb3143a4da, type: 2}
   m_IncludeLayers:
     serializedVersion: 2
     m_Bits: 0
@@ -1554,42 +1556,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: df27ee43e1f7a77419c115ec66f445f3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!1 &1979019580
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1979019581}
-  m_Layer: 5
-  m_Name: BallStarter
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!224 &1979019581
-RectTransform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1979019580}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 1476273306}
-  m_Father: {fileID: 209857037}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: -2096}
-  m_SizeDelta: {x: 0, y: 0}
-  m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &2040028161
 GameObject:
   m_ObjectHideFlags: 0
@@ -1658,8 +1624,8 @@ Canvas:
   m_GameObject: {fileID: 2040028161}
   m_Enabled: 1
   serializedVersion: 3
-  m_RenderMode: 0
-  m_Camera: {fileID: 0}
+  m_RenderMode: 1
+  m_Camera: {fileID: 519420031}
   m_PlaneDistance: 100
   m_PixelPerfect: 0
   m_ReceivesEvents: 1
@@ -1698,7 +1664,7 @@ PrefabInstance:
   serializedVersion: 2
   m_Modification:
     serializedVersion: 3
-    m_TransformParent: {fileID: 1979019581}
+    m_TransformParent: {fileID: 209857037}
     m_Modifications:
     - target: {fileID: 2536705040929310633, guid: dee6ab39eba1650449efc7aa8eeef044, type: 3}
       propertyPath: m_Name
@@ -1770,7 +1736,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3079053122949870991, guid: dee6ab39eba1650449efc7aa8eeef044, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 50
+      value: -998
       objectReference: {fileID: 0}
     - target: {fileID: 3079053122949870991, guid: dee6ab39eba1650449efc7aa8eeef044, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
