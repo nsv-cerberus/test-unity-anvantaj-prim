@@ -1,116 +1,111 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 
 [RequireComponent(typeof(RectTransform))]
 public class BounceLine : MonoBehaviour
 {
     [SerializeField] private Canvas _canvas;
+    [SerializeField] private Sensor _sensor;
     [SerializeField] private GameObject _dotPrefab;
-    [SerializeField] private int _dotsCount = 10;
-
     [SerializeField] private LayerMask _collisionMask;
+    [SerializeField] private int _dotsCount = 10;
     [SerializeField] private float _maxRayDistance = 1000f;
 
-    [SerializeField] private Sensor _sensor;
-
-    private RectTransform _rt;
-    private Camera _cam;
-    private float _planeDist;
+    private RectTransform _rectTransform;
+    private Camera _camera;
     private List<RectTransform> _dots;
 
     private void Awake()
     {
-        _rt = GetComponent<RectTransform>();
-        _cam = _canvas.renderMode == RenderMode.ScreenSpaceCamera
+        _rectTransform = GetComponent<RectTransform>();
+        _camera = _canvas.renderMode == RenderMode.ScreenSpaceCamera
                ? _canvas.worldCamera
                : Camera.main;
-        _planeDist = _canvas.planeDistance;
 
-        // создаём пул точек
-        _dots = new List<RectTransform>(_dotsCount);
-        for (int i = 0; i < _dotsCount; i++)
-        {
-            var d = Instantiate(_dotPrefab, _rt).GetComponent<RectTransform>();
-            d.gameObject.SetActive(false);
-            _dots.Add(d);
-        }
+        CreateDots();
 
         _sensor.DrawBounceLine += Draw;
     }
 
-    private void OnDisable()
+    private void CreateDots()
     {
-        _sensor.DrawBounceLine -= Draw;
+        _dots = new List<RectTransform>(_dotsCount);
+
+        for (int i = 0; i < _dotsCount; i++)
+        {
+            var d = Instantiate(_dotPrefab, _rectTransform).GetComponent<RectTransform>();
+            d.gameObject.SetActive(false);
+            _dots.Add(d);
+        }
     }
 
-    private void Draw(Vector2 screenStart, Vector2 screenDir)
+    private void Draw(Vector2 screenBallPosition, Vector2 direction)
     {
-        if (_cam == null) return;
-        var path = CalculatePath(screenStart, screenDir);
+        if (_camera == null) return;
+        var path = CalculatePath(screenBallPosition, direction);
         PlaceDots(path);
     }
 
-    private List<Vector2> CalculatePath(Vector2 screenStart, Vector2 screenDir)
+    private List<Vector2> CalculatePath(Vector2 screenBallPosition, Vector2 direction)
     {
-        var pts = new List<Vector2>();
+        var points = new List<Vector2>();
 
-        // 1) стартовая точка в локале RectTransform
         RectTransformUtility.ScreenPointToLocalPointInRectangle(
-            _rt, screenStart, _cam, out Vector2 localStart
+            _rectTransform, screenBallPosition, _camera, out Vector2 localStart
         );
-        pts.Add(localStart);
+        points.Add(localStart);
 
-        // 2) подготавливаем мир‑луч
-        Vector3 sp0 = new Vector3(screenStart.x, screenStart.y, _planeDist);
-        Vector3 sp1 = new Vector3(
-            screenStart.x + screenDir.x,
-            screenStart.y + screenDir.y,
-            _planeDist
+        float screenRadius = _sensor.Ball.Radius;
+
+        Vector3 screenPoint = new Vector3(0, 0, 0);
+        Vector3 screenPointWithRadius = new Vector3(screenRadius, 0, 0);
+        float worldRadius = Vector3.Distance(
+            _camera.ScreenToWorldPoint(screenPoint),
+            _camera.ScreenToWorldPoint(screenPointWithRadius)
         );
-        Vector2 wStart = _cam.ScreenToWorldPoint(sp0);
-        Vector2 wEnd = _cam.ScreenToWorldPoint(sp1);
-        Vector2 wDir = (wEnd - wStart).normalized;
 
-        // 3) кастим все попадания
-        var hits = Physics2D.RaycastAll(
-            wStart, wDir, _maxRayDistance, _collisionMask
+        var hits = Physics2D.CircleCastAll(
+            _camera.ScreenToWorldPoint(new Vector3(screenBallPosition.x, screenBallPosition.y, 0)),
+            worldRadius,
+            direction, _maxRayDistance, _collisionMask
         );
 
         if (hits.Length > 0)
         {
-            // 4) точка удара
             Vector2 worldHit = hits[0].point;
-            Vector2 screenHit = _cam.WorldToScreenPoint(worldHit);
+            Vector2 screenHit = _camera.WorldToScreenPoint(worldHit);
             RectTransformUtility.ScreenPointToLocalPointInRectangle(
-                _rt, screenHit, _cam, out Vector2 localHit
+                _rectTransform, screenHit, _camera, out Vector2 localHit
             );
-            pts.Add(localHit);
 
-            // 5) отражаем в локале
+            float radius = _sensor.Ball.Radius;
+            Vector2 normalizedDirection = direction.normalized;
+            Vector2 adjustedLocalHit = localHit - normalizedDirection * radius;
+            points.Add(adjustedLocalHit);
+
             Vector2 localDir = (localHit - localStart).normalized;
 
             // нормаль в локал
             Vector3 worldNorm3 = hits[0].normal;
-            Vector3 localNorm3 = _rt.InverseTransformDirection(worldNorm3);
+            Vector3 localNorm3 = _rectTransform.InverseTransformDirection(worldNorm3);
             Vector2 localNorm = ((Vector2)localNorm3).normalized;
 
             Vector2 refl = Vector2.Reflect(localDir, localNorm);
 
-            // 6) конечная точка (по половине дистанции)
+            // конечная точка (по половине дистанции)
             Vector2 localEnd = localHit + refl * (_maxRayDistance * 0.5f);
-            pts.Add(localEnd);
+            points.Add(localEnd);
         }
         else
         {
-            // если не попали — уходим по локальному направлению
-            Vector3 worldDir3 = new Vector3(wDir.x, wDir.y, 0f);
-            Vector3 localDir3 = _rt.InverseTransformDirection(worldDir3);
+            // если не попадаем — уходим по локальному направлению
+            Vector3 worldDir3 = new Vector3(direction.x, direction.y, 0f);
+            Vector3 localDir3 = _rectTransform.InverseTransformDirection(worldDir3);
             Vector2 localDir = ((Vector2)localDir3).normalized;
-            pts.Add(localStart + localDir * _maxRayDistance);
+            points.Add(localStart + localDir * _maxRayDistance);
         }
 
-        return pts;
+        return points;
     }
 
     private void PlaceDots(List<Vector2> path)
@@ -147,5 +142,10 @@ public class BounceLine : MonoBehaviour
             passed -= segLen;
             if (passed < 0f) passed = 0f;
         }
+    }
+
+    private void OnDisable()
+    {
+        _sensor.DrawBounceLine -= Draw;
     }
 }

@@ -8,12 +8,14 @@ public class Ball : MonoBehaviour
 
     [Inject] private LevelGameplayManager _levelGameplayManager;
 
-    private Vector2 _direction;
+    private CircleCollider2D _circleCollider;
     private Rigidbody2D _rigidbody;
     private Coroutine _velocityCoroutine;
+    private Vector2 _direction;
 
     private void Awake()
     {
+        _circleCollider = GetComponent<CircleCollider2D>();
         _rigidbody = GetComponent<Rigidbody2D>();
     }
 
@@ -74,6 +76,8 @@ public class Ball : MonoBehaviour
             }
         }
     }
+
+    public float Radius => _circleCollider.radius;
 
     private void SetVelocity() => _rigidbody.linearVelocity = _direction * _velocity;
     private void ResetVelocity() => _rigidbody.linearVelocity = Vector2.zero;

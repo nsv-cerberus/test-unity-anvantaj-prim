@@ -1403,13 +1403,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _canvas: {fileID: 2040028164}
+  _sensor: {fileID: 932859489}
   _dotPrefab: {fileID: 3953161670692844237, guid: ef568f2286e115f45855a97e09824749, type: 3}
-  _dotsCount: 10
   _collisionMask:
     serializedVersion: 2
     m_Bits: 8
+  _dotsCount: 30
   _maxRayDistance: 1000
-  _sensor: {fileID: 932859489}
 --- !u!114 &1747913442 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 9192027656411159503, guid: dee6ab39eba1650449efc7aa8eeef044, type: 3}
