@@ -6,7 +6,7 @@ using Zenject;
 public class Sensor : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IDragHandler
 {
     public event Action<Vector2, Vector2> DrawBounceLine;
-    public event Action ResetBounceLine;
+    public event Action DeactivateBounceLine;
 
     [SerializeField] private Ball _ball;
 
@@ -52,6 +52,7 @@ public class Sensor : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IDr
         Vector2 direction = (touchPosition - screenBallPosition).normalized;
 
         _levelGameplayManager.OnLaunchBallToDirection(direction);
+        OnDeactivateBounceLine();
         DeactivateSensor();
     }
 
@@ -59,7 +60,7 @@ public class Sensor : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IDr
     private void DeactivateSensor() => _isWorking = false;
 
     private void OnDrawBounceLine(Vector2 screenStartPosition, Vector2 direction) => DrawBounceLine?.Invoke(screenStartPosition, direction);
-    private void OnResetBounceLine() => ResetBounceLine?.Invoke();
+    private void OnDeactivateBounceLine() => DeactivateBounceLine?.Invoke();
 
     public void OnDestroy()
     {

@@ -167,6 +167,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b46643b0eef6553478de9f2bf360cef5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _grid: {fileID: 1126846401}
   _blockPrefab: {fileID: 9187143456337358280, guid: 4ae5741ae9713d64f9b6b776a9210e83, type: 3}
   _blocksSettings: {fileID: 11400000, guid: 3b8bfd57141a6854693c7a402a650724, type: 2}
   _levelMovesSettings: {fileID: 11400000, guid: fe13573b673b2b64bb38cac5a4ed977f, type: 2}
@@ -1321,6 +1322,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1126846400}
+  - component: {fileID: 1126846401}
   m_Layer: 5
   m_Name: Grid
   m_TagString: Untagged
@@ -1349,6 +1351,18 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 1682}
   m_Pivot: {x: 0.5, y: 1}
+--- !u!114 &1126846401
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1126846399}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b2a28a81385415f4194eccf7b46aefe8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!224 &1476273306 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 3079053122949870991, guid: dee6ab39eba1650449efc7aa8eeef044, type: 3}

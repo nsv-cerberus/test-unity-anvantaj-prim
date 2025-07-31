@@ -22,12 +22,14 @@ public class Ball : MonoBehaviour
     private void Start()
     {
         _levelGameplayManager.LaunchBallToDirection += LaunchToDirection;
+        _levelGameplayManager.GameOver += ResetVelocity;
     }
 
     private void LaunchToDirection(Vector2 direction)
     {
         _direction = direction;
         SetVelocity();
+        _levelGameplayManager.SetBallMoveState(true);
     }
 
     private void OnCollisionEnter2D(Collision2D collision)
@@ -39,7 +41,7 @@ public class Ball : MonoBehaviour
                 if (_rigidbody.linearVelocity != Vector2.zero)
                 {
                     ResetVelocity();
-                    _levelGameplayManager.StartNewMove();
+                    _levelGameplayManager.SetBallMoveState(false);
                 }
 
                 return;
@@ -85,5 +87,6 @@ public class Ball : MonoBehaviour
     private void OnDestroy()
     {
         _levelGameplayManager.LaunchBallToDirection -= LaunchToDirection;
+        _levelGameplayManager.GameOver -= ResetVelocity;
     }
 }

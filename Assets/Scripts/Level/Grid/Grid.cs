@@ -1,4 +1,5 @@
 using UnityEngine;
+using Zenject;
 
 public struct Cell
 {
@@ -12,13 +13,20 @@ public struct Cell
     public void SetBlock(Block block) => _block = block;
 }
 
-public class Grid
+public class Grid : MonoBehaviour
 {
+    [Inject] private LevelGameplayManager _levelGameplayManager;
+
     private const int _rowsCount = 9;
     private const int _columnsCount = 5;
-    private Cell[,] _cells = new Cell[_rowsCount, _columnsCount];
+    private Cell[,] _cells;
 
     public Cell[,] Cells => _cells;
+
+    private void Awake()
+    {
+        _cells = new Cell[_rowsCount, _columnsCount];
+}
 
     public void DefineCellsPositions(float width, float height)
     {
@@ -103,6 +111,11 @@ public class Grid
         _cells[newRow, col].SetBlock(block);
         _cells[row, col].SetBlock(null);
 
+        if (newRow == _rowsCount - 1)
+        {
+            _levelGameplayManager.OnGameOver();
+        }
+
         return new[] { newRow, col };
     }
 
@@ -117,11 +130,4 @@ public class Grid
     public Block GetRightNeighbourBlock(int row, int col) => col < _cells.GetLength(1) - 1 ? _cells[row, col + 1].Block : null;
     public Block GetUpNeighbourBlock(int row, int col) => row < _cells.GetLength(0) - 1 ? _cells[row + 1, col].Block : null;
     public Block GetDownNeighbourBlock(int row, int col) => row > 0 ? _cells[row - 1, col].Block : null;
-    
-    /*
-    public Vector3 GetLeftNeighbourPosition(int row, int col) => (col > 0) ? GetCellPosition(row, col - 1) : Vector3.zero;
-    public Vector3 GetRightNeighbourPosition(int row, int col) => (col < _cells.GetLength(1) - 1) ? GetCellPosition(row, col + 1) : Vector3.zero;
-    public Vector3 GetUpNeighbourPosition(int row, int col) => (row < _cells.GetLength(0) - 1) ? GetCellPosition(row + 1, col) : Vector3.zero;
-    public Vector3 GetDownNeighbourPosition(int row, int col) => (row > 0) ? GetCellPosition(row - 1, col) : Vector3.zero;
-    */
 }

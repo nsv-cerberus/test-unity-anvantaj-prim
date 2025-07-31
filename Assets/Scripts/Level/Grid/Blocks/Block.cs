@@ -27,12 +27,12 @@ public class Block : PoolObject
     private int _number;
     private int[] _gridPosition = new int[2];
     private Blocks _blocks;
-    private bool _isAnimated = false;
+    private bool _inMotion = false;
 
     public int Number => _number;
     public int RowPosition => _gridPosition[0];
     public int ColumnPosition => _gridPosition[1];
-    public bool IsAnimated => _isAnimated;
+    public bool InMotion => _inMotion;
 
     private void Awake()
     {
@@ -50,10 +50,10 @@ public class Block : PoolObject
         transform.localPosition = _blocks.Grid.GetCellPosition(0, columnIndex);
         _boxCollider.enabled = true;
 
-        _levelGameplayManager.MoveBlocksDown += MoveBlockToDownOnInitialize;
+        _levelGameplayManager.MoveBlocksDown += MoveBlockDown;
     }
 
-    private void MoveBlockToDownOnInitialize()
+    private void MoveBlockDown()
     {
         MoveBlockToDirection(BlockMoveDirection.Down);
     }
@@ -94,7 +94,7 @@ public class Block : PoolObject
         foreach (var (getNeighbour, isEmpty) in directions)
         {
             var neighbour = getNeighbour(RowPosition, ColumnPosition);
-            if (neighbour != null && !neighbour.IsAnimated && neighbour.Number == _number)
+            if (neighbour != null && !neighbour.InMotion && neighbour.Number == _number)
             {
                 MergeWithNeighbour(neighbour);
                 return;
@@ -133,25 +133,30 @@ public class Block : PoolObject
 
     private void PlayAnimationToHimselfPosition(Action callback = null)
     {
-        _isAnimated = true;
+        _inMotion = true;
+        _levelGameplayManager.IncreaseCountOfBlocksInMotion();
+
         Vector2 position = _blocks.Grid.GetCellPosition(RowPosition, ColumnPosition);
         transform.DOLocalMove(new Vector3(position.x, position.y, transform.localPosition.z), _moveAnimationDuration)
             .OnComplete(() =>
             {
-                _isAnimated = false;
+                _levelGameplayManager.DecreaseCountOfBlocksInMotion();
+                _inMotion = false;
                 callback?.Invoke();
             });
     }
 
     private void PlayMergeAnimation(Vector3 mergePosition)
     {
-        _levelGameplayManager.MoveBlocksDown -= MoveBlockToDownOnInitialize;
+        _levelGameplayManager.MoveBlocksDown -= MoveBlockDown;
         _boxCollider.enabled = false;
+        _levelGameplayManager.IncreaseCountOfBlocksInMergeMotion();
 
         transform.DOLocalMove(mergePosition, _mergeAnimationDuration)
             .OnComplete(() =>
             {
                 ReturnToObjectsPool();
+                _levelGameplayManager.DecreaseCountOfBlocksInMergeMotion();
             });
     }
 

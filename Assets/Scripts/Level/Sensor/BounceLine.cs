@@ -24,7 +24,8 @@ public class BounceLine : MonoBehaviour
 
         CreateDots();
 
-        _sensor.DrawBounceLine += Draw;
+        _sensor.DrawBounceLine += DrawBounceLine;
+        _sensor.DeactivateBounceLine += ResetBounceLine;
     }
 
     private void CreateDots()
@@ -39,7 +40,7 @@ public class BounceLine : MonoBehaviour
         }
     }
 
-    private void Draw(Vector2 screenBallPosition, Vector2 direction)
+    private void DrawBounceLine(Vector2 screenBallPosition, Vector2 direction)
     {
         if (_camera == null) return;
         var path = CalculatePath(screenBallPosition, direction);
@@ -144,8 +145,14 @@ public class BounceLine : MonoBehaviour
         }
     }
 
+    private void ResetBounceLine()
+    {
+        foreach (var d in _dots)
+            d.gameObject.SetActive(false);
+    }
+
     private void OnDisable()
     {
-        _sensor.DrawBounceLine -= Draw;
+        _sensor.DrawBounceLine -= DrawBounceLine;
     }
 }

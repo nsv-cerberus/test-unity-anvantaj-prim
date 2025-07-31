@@ -4,7 +4,7 @@ using Zenject;
 
 public class Blocks : MonoBehaviour
 {
-    private Grid _grid = new Grid();
+    [SerializeField] private Grid _grid;
     [SerializeField] private Block _blockPrefab;
     [SerializeField] private BlocksSettingsSO _blocksSettings;
     [SerializeField] private LevelMovesSettingsSO _levelMovesSettings;
@@ -14,19 +14,24 @@ public class Blocks : MonoBehaviour
 
     private BlocksPool _blocksPool = new BlocksPool();
     private const int _minBlocksInRow = 1;
-    private const int _maxBlocksInRow = 2;
+    private const int _maxBlocksInRow = 4;
 
     public Grid Grid => _grid;
     public BlocksPool BlocksPool => _blocksPool;
 
     private void Awake()
     {
+        _levelGameplayManager.CreateNewRow += CreateNewRow;
+    }
+
+    private void Start()
+    {
         var blockPrefabRectTransform = _blockPrefab.GetComponent<RectTransform>();
         var width = blockPrefabRectTransform.rect.width;
         var height = blockPrefabRectTransform.rect.height;
         _grid.DefineCellsPositions(width, height);
 
-        _levelGameplayManager.CreateNewRow += CreateNewRow;
+        _levelGameplayManager.StartNewMove();
     }
 
     private void CreateNewRow()
