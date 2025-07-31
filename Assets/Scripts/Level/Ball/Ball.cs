@@ -41,7 +41,6 @@ public class Ball : MonoBehaviour
                 if (_rigidbody.linearVelocity != Vector2.zero)
                 {
                     ResetVelocity();
-                    _levelGameplayManager.SetBallMoveState(false);
                 }
 
                 return;
@@ -53,15 +52,15 @@ public class Ball : MonoBehaviour
                 float angle = Mathf.Atan2(collisionVector.y, collisionVector.x) * Mathf.Rad2Deg;
                 Block block = collision.collider.GetComponent<Block>();
 
-                if (angle > 45 && angle <= 135)
+                if (angle > 45 && angle < 135)
                 {
                     block.TryMoveBlockToDirection(BlockMoveDirection.Up);
                 }
-                else if (angle > -135 && angle <= -45)
+                else if (angle > -135 && angle < -45)
                 {
                     block.TryMoveBlockToDirection(BlockMoveDirection.Down);
                 }
-                else if (angle > -45 && angle <= 45)
+                else if (angle > -45 && angle < 45)
                 {
                     block.TryMoveBlockToDirection(BlockMoveDirection.Right);
                 }
@@ -82,7 +81,11 @@ public class Ball : MonoBehaviour
     public float Radius => _circleCollider.radius;
 
     private void SetVelocity() => _rigidbody.linearVelocity = _direction * _velocity;
-    private void ResetVelocity() => _rigidbody.linearVelocity = Vector2.zero;
+    private void ResetVelocity() 
+    {
+        _rigidbody.linearVelocity = Vector2.zero;
+        _levelGameplayManager.SetBallMoveState(false);
+    }
 
     private void OnDestroy()
     {

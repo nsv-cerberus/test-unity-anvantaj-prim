@@ -64,23 +64,6 @@ public class Block : PoolObject
         _gridPosition[1] = columnPosition;
     }
 
-    public void TryMoveBlockToDirection(BlockMoveDirection direction)
-    {
-        bool canMove = direction switch
-        {
-            BlockMoveDirection.Left => _blocks.Grid.CheckLeftNeighbourIsEmpty(RowPosition, ColumnPosition),
-            BlockMoveDirection.Right => _blocks.Grid.CheckRightNeighbourIsEmpty(RowPosition, ColumnPosition),
-            BlockMoveDirection.Up => _blocks.Grid.CheckUpNeighbourIsEmpty(RowPosition, ColumnPosition),
-            BlockMoveDirection.Down => _blocks.Grid.CheckDownNeighbourIsEmpty(RowPosition, ColumnPosition),
-            _ => false
-        };
-
-        if (canMove)
-        {
-            MoveBlockToDirection(direction, CheckBlockToMerge);
-        }
-    }
-
     private void CheckBlockToMerge()
     {
         var directions = new (Func<int, int, Block> GetNeighbour, Func<int, int, bool> IsEmpty)[]
@@ -113,20 +96,35 @@ public class Block : PoolObject
         neighbourBlock.PlayMergeAnimation(mergePosition);
     }
 
+    public void TryMoveBlockToDirection(BlockMoveDirection direction)
+    {
+        if (!InMotion)
+            MoveBlockToDirection(direction, CheckBlockToMerge);
+    }
+
     private void MoveBlockToDirection(BlockMoveDirection direction, Action callback = null)
     {
-        int[] newPosition = direction switch
+        switch (direction)
         {
-            BlockMoveDirection.Left => _blocks.Grid.MoveBlockToLeftCell(this),
-            BlockMoveDirection.Right => _blocks.Grid.MoveBlockToRightCell(this),
-            BlockMoveDirection.Up => _blocks.Grid.MoveBlockToUpCell(this),
-            BlockMoveDirection.Down => _blocks.Grid.MoveBlockToDownCell(this),
-            _ => null
-        };
+            case BlockMoveDirection.Left:
+                _blocks.Grid.MoveBlockToLeftCell(this);
+                break;
+            case BlockMoveDirection.Right:
+                _blocks.Grid.MoveBlockToRightCell(this);
+                break;
+            case BlockMoveDirection.Up:
+                _blocks.Grid.MoveBlockToUpCell(this);
+                break;
+            case BlockMoveDirection.Down:
+                _blocks.Grid.MoveBlockToDownCell(this);
+                break;
+            default:
+                Debug.LogError("Unknown direction");
+                return;
+        }
 
-        if (newPosition != null)
+        if (_blocks.Grid.GetCellPosition(_gridPosition[0], _gridPosition[1]) != transform.localPosition)
         {
-            SetGridPosition(newPosition[0], newPosition[1]);
             PlayAnimationToHimselfPosition(callback);
         }
     }
@@ -142,7 +140,9 @@ public class Block : PoolObject
             {
                 _levelGameplayManager.DecreaseCountOfBlocksInMotion();
                 _inMotion = false;
-                callback?.Invoke();
+
+                if (callback != null)
+                    callback?.Invoke();
             });
     }
 
@@ -150,6 +150,7 @@ public class Block : PoolObject
     {
         _levelGameplayManager.MoveBlocksDown -= MoveBlockDown;
         _boxCollider.enabled = false;
+
         _levelGameplayManager.IncreaseCountOfBlocksInMergeMotion();
 
         transform.DOLocalMove(mergePosition, _mergeAnimationDuration)

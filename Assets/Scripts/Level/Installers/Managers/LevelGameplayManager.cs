@@ -9,6 +9,7 @@ public class LevelGameplayManager : IInitializable
     public event Action MoveBlocksDown;
     public event Action ActivateSensor;
     public event Action<Vector2> LaunchBallToDirection;
+    public event Action CheckGameOver;
     public event Action GameOver;
 
     private int _move = 0;
@@ -19,18 +20,11 @@ public class LevelGameplayManager : IInitializable
 
     public int Move => _move;
 
-    public void Initialize()
-    {
-        // StartNewMove();
-    }
+    public void Initialize(){}
 
     public void StartNewMove()
     {
-        if (_gameOver)
-        {
-            Debug.Log("Game Over!");
-            return;
-        }
+        if (_gameOver) return;
 
         if (!_ballIsMove && _blocksInMotionCount == 0 && _blocksInMergeMotionCount == 0)
         {
@@ -41,30 +35,56 @@ public class LevelGameplayManager : IInitializable
 
     public void SetBallMoveState(bool isMove)
     {
-        _ballIsMove = isMove;        
-        StartNewMove();
+        _ballIsMove = isMove;
+
+        if (!_ballIsMove && !_gameOver)
+        {
+            StartNewMove();
+        }
     }
 
     public void IncreaseCountOfBlocksInMotion() => _blocksInMotionCount++;
 
     public void DecreaseCountOfBlocksInMotion()
     {
-        if (_blocksInMotionCount > 0) _blocksInMotionCount--;
-        if (!_ballIsMove && _blocksInMotionCount == 0) OnActivateSensor();
+        if (_blocksInMotionCount > 0)
+        {
+            _blocksInMotionCount--;
+        }
+
+        if (_blocksInMotionCount == 0)
+        {
+            OnCheckGameOver();
+
+            if (!_gameOver && !_ballIsMove)
+            {
+                Debug.Log("On Activate Sensor!");
+                OnActivateSensor();
+            }
+        }
     }
 
     public void IncreaseCountOfBlocksInMergeMotion() => _blocksInMergeMotionCount++;
 
     public void DecreaseCountOfBlocksInMergeMotion()
     {
-        if (_blocksInMergeMotionCount > 0) _blocksInMergeMotionCount--;
-         StartNewMove();
+        if (_blocksInMergeMotionCount > 0)
+        {
+            _blocksInMergeMotionCount--;
+        }
+
+        StartNewMove();
     }
 
     public void OnLaunchGameplay() => LaunchGameplay?.Invoke(); 
     public void OnCreateNewRow() => CreateNewRow?.Invoke();
     public void OnMoveBlocksDown() => MoveBlocksDown?.Invoke();
+    public void OnCheckGameOver() => CheckGameOver?.Invoke();
     public void OnActivateSensor() => ActivateSensor?.Invoke();
     public void OnLaunchBallToDirection(Vector2 directionPosition) => LaunchBallToDirection?.Invoke(directionPosition);
-    public void OnGameOver() => GameOver?.Invoke();
+    public void OnGameOver()
+    {
+        _gameOver = true;
+        GameOver?.Invoke();
+    }
 }

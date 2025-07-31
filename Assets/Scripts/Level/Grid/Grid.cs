@@ -26,6 +26,8 @@ public class Grid : MonoBehaviour
     private void Awake()
     {
         _cells = new Cell[_rowsCount, _columnsCount];
+
+        _levelGameplayManager.CheckGameOver += CheckGameOver;
 }
 
     public void DefineCellsPositions(float width, float height)
@@ -66,57 +68,77 @@ public class Grid : MonoBehaviour
     public void RegisterBlockToCell(Block block) => _cells[block.RowPosition, block.ColumnPosition].SetBlock(block);
     public void UnregisterBlockFromCell(Block block) => _cells[block.RowPosition, block.ColumnPosition].SetBlock(null);
 
-    public int[] MoveBlockToLeftCell(Block block)
+    public void MoveBlockToLeftCell(Block block)
     {
         var row = block.RowPosition;
         var col = block.ColumnPosition;
         var newCol = col - 1;
 
+        if (newCol < 0 || _cells[row, newCol].Block != null) return;
+
         _cells[row, newCol].SetBlock(block);
         _cells[row, col].SetBlock(null);
 
-        return new[] { row, newCol };
+        block.SetGridPosition(row, newCol);
     }
 
-    public int[] MoveBlockToRightCell(Block block)
+    public void MoveBlockToRightCell(Block block)
     {
         var row = block.RowPosition;
         var col = block.ColumnPosition;
         var newCol = col + 1;
 
+        if (newCol >= _cells.GetLength(1) || _cells[row, newCol].Block != null) return;
+
         _cells[row, newCol].SetBlock(block);
         _cells[row, col].SetBlock(null);
 
-        return new[] { row, newCol };
+        block.SetGridPosition(row, newCol);
     }
 
-    public int[] MoveBlockToUpCell(Block block)
+    public void MoveBlockToUpCell(Block block)
     {
         var row = block.RowPosition;
         var col = block.ColumnPosition;
         var newRow = row - 1;
 
+        if (newRow < 1 || _cells[newRow, col].Block != null) return;
+
         _cells[newRow, col].SetBlock(block);
         _cells[row, col].SetBlock(null);
 
-        return new[] { newRow, col };
+        block.SetGridPosition(newRow, col);
     }
 
-    public int[] MoveBlockToDownCell(Block block)
+    public void MoveBlockToDownCell(Block block)
     {
         var row = block.RowPosition;
         var col = block.ColumnPosition;
         var newRow = row + 1;
 
+        if (newRow >= _cells.GetLength(0) || _cells[newRow, col].Block != null) return;
+
         _cells[newRow, col].SetBlock(block);
         _cells[row, col].SetBlock(null);
 
-        if (newRow == _rowsCount - 1)
-        {
-            _levelGameplayManager.OnGameOver();
-        }
+        block.SetGridPosition(newRow, col);
+    }
 
-        return new[] { newRow, col };
+    private void CheckGameOver()
+    {
+        Debug.Log("Check Game Over");
+
+        var lastRowIndex = _cells.GetLength(0) - 1;
+
+        for (int col = 0; col < _cells.GetLength(1); col++)
+        {
+            if (_cells[lastRowIndex, col].Block != null)
+            {
+                Debug.Log("Game Over!");
+                _levelGameplayManager.OnGameOver();
+                return;
+            }
+        }
     }
 
     public Vector3 GetCellPosition(int row, int col) => _cells[row, col].Position;
@@ -130,4 +152,9 @@ public class Grid : MonoBehaviour
     public Block GetRightNeighbourBlock(int row, int col) => col < _cells.GetLength(1) - 1 ? _cells[row, col + 1].Block : null;
     public Block GetUpNeighbourBlock(int row, int col) => row < _cells.GetLength(0) - 1 ? _cells[row + 1, col].Block : null;
     public Block GetDownNeighbourBlock(int row, int col) => row > 0 ? _cells[row - 1, col].Block : null;
+
+    private void OnDisable()
+    {
+        _levelGameplayManager.CheckGameOver -= CheckGameOver;
+    }
 }
